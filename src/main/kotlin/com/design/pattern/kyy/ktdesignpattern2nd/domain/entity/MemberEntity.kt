@@ -15,4 +15,14 @@ class MemberEntity  : BaseEntity() {
 
     @Embedded
     var address: Address? = null;
+
+    companion object {
+        fun of(name: String, age: Int, address: Address): MemberEntity {
+            val member = MemberEntity()
+            member.name = name
+            member.age = age
+            member.address = address
+            return member
+        }
+    }
 }

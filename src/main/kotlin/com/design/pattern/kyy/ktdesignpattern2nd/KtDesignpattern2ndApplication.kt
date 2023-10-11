@@ -1,11 +1,16 @@
 package com.design.pattern.kyy.ktdesignpattern2nd
 
+import com.design.pattern.kyy.ktdesignpattern2nd.domain.entity.Address
+import com.design.pattern.kyy.ktdesignpattern2nd.domain.entity.MemberEntity
 import jakarta.persistence.*
 import jakarta.transaction.Transactional
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.stereotype.Controller
+import org.springframework.stereotype.Repository
 import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
@@ -20,13 +25,82 @@ class KtDesignpattern2ndApplication : CommandLineRunner {
 
     override fun run(vararg args: String?) {
 
-        val add = KtDesignpattern2ndApplication.add(1, 2)
+        val add = add(1, 2)
         println(add)
 
         // 무한수 계속 출력하기 , 메모리가 허용하는 수준까지 계속 출력한다.
 //        generateSequence(0) { it + 1 }.forEach(::println)
 
         println("hello, kotlin")
+    }
+}
+
+/**
+ * 레포지토리 인터페이스를 만들어두고, 퍼시턴스를 만들어서 언제 든지 갈아껴야 한다.
+ * 만약 이런 패턴을 모른다면 우리는 if문을 써서 클래스들을 호출해야 했을 것이다.
+ *
+ */
+
+interface MemberRepository {
+    fun save(member: MemberEntity)
+    fun findById(id: Long): MemberEntity?
+}
+
+@Repository
+class RedisRepository : MemberRepository {
+    override fun save(member: MemberEntity) {
+        TODO("Not yet implemented")
+    }
+
+    override fun findById(id: Long): MemberEntity? {
+        TODO("Not yet implemented")
+    }
+
+}
+
+@Repository
+class DbMemberRepository: MemberRepository {
+    override fun save(member: MemberEntity) {
+        println("db save")
+    }
+
+    override fun findById(id: Long): MemberEntity? {
+        println("db find")
+        return null
+    }
+}
+
+@Repository
+class MemoryMemberRepository : MemberRepository {
+    override fun save(member: MemberEntity) {
+        TODO("Not yet implemented")
+    }
+
+    override fun findById(id: Long): MemberEntity? {
+        TODO("Not yet implemented")
+    }
+
+}
+
+@Service
+class MemberService(@Qualifier("memoryMemberRepository") private val memberRepository: MemberRepository) {
+    fun join(member: MemberEntity) {
+        memberRepository.save(member)
+    }
+
+    fun findMember(id: Long): MemberEntity? {
+        return memberRepository.findById(id)
+    }
+}
+
+@Controller
+class MemberController(private val memberService: MemberService) {
+    fun join(id: Long, name: String) {
+        memberService.join(MemberEntity.of(name, 10, Address.of("seoul", "street", "zipcode")))
+    }
+
+    fun findMember(id: Long): MemberEntity? {
+        return memberService.findMember(id)
     }
 }
 
